@@ -23,7 +23,6 @@
 
 using namespace LZBG;
 
-// this is a tail recursive call
 void pnsv(const int * sa, int n, int * psv, int * nsv){
   int i;
   std::stack<int,std::vector<int> > S;
