@@ -1,0 +1,123 @@
+-------------------------------------------------------------
+
+This repository contains implementations of a new, simple, 
+and fast approach for LZ77 factorization.
+
+-------------------------------------------------------------
+Simple explanation of approach
+-------------------------------------------------------------
+Our approach basically computes the PSV and NSV values
+based on the suffix array SA, where
+
+  PSV[i] = max { j < i | SA[j] < SA[i] }
+  NSV[i] = min { j > i | SA[j] < SA[i] }
+
+which can be computed by a process called peak elimination.
+Then,
+
+  LPF[i] = max { lcp(T[j:N], T[SA[i]:N]) | j < SA[i] }
+         = max { lcp(T[SA[PSV[i]]:N], T[SA[i]:N]),
+                 lcp(T[SA[NSV[i]]:N], T[SA[i]:N]) }.
+
+Where, by definition, an LZ77 factor starting at position 
+SA[i] in the text will have length LPF[i].
+(above description is in lex order, but text order is 
+ considered depending on the variant).
+
+Most previous algorithms compute LPFs for all 1 \leq i \leq N.
+However, our algorithm avoids computing all of these values,
+but rather computes the LZ77 parse directly from
+PSV and NSV, making the algorithm simpler and faster.
+
+There are 6 variants: BGS, BGL, BGT and iBGS, iBGL, and iBGT.
+All run in linear time, given the suffix array of the string.
+Working memory is as follows:
+
+BGS, iBGS: 17*N Bytes + stack
+BGL, iBGL: 17*N Bytes
+BGT, iBGT: 13*N Bytes
+
+-------------------------------------------------------------
+Files
+-------------------------------------------------------------
+
+Each of the above variants are coded in the following files:
+
+ bgCommon.hpp: header file for common utility functions
+ bgCommon.cpp: implementation of common utility functions
+
+ bgsMain.cpp: peak elimination in lex order using stack
+ibgsMain.cpp: peak elimination in lex order using stack, interleaving PSV,NSV
+
+ bglMain.cpp: peak elimination in lex order
+ibglMain.cpp: peak elimination in lex order, interleaving PSV,NSV
+
+ bgtMain.cpp: peak elimination in text order with the help of \Phi
+ibgtMain.cpp: peak elimination in text order with the help of \Phi, interleaving PSV,NSV
+
+where interleaving PSV, NSV means that they are stored in a 
+single array PNSV of length 2*N and PNSV[2*i] = PSV[i] and PNSV[2*i+1] = NSV[i].
+
+Computational experiments so far have shown that iBGS seems to be
+fastest except for extremely repetitive data, where iBGT seems to be fastest.
+
+We also provide implementation for the algorithm shown in:
+ E. Ohlebusch & S. Gog, "Lempel-Ziv Factorization Revisited",
+ In Proc. CPM 2011, LNCS 6661:15-26, 2011.
+(our implementation is based on the pseudo-code in the paper,
+ and the performance is basically equal to the implementation
+ that Dr. Simon Gog shared with us.)
+
+These are implemented in:
+ ogMain.cpp: LZ_OG
+iogMain.cpp: LZ_OG with interleaving LPS and PrevOcc
+LZ_OG requires 13*N Bytes of working memory.
+
+The files:
+  divsufsort.h
+  divsufsort.c
+are from libdivsufsort-lite by Yuta Mori, for computing the
+suffix array of a string.
+
+-------------------------------------------------------------
+Usage:
+-------------------------------------------------------------
+The programs can be compiled via the SCons build tool:
+
+  http://scons.org
+
+just type 'scons' in the directory. 
+The SConstruct file should be edited if you need to modify
+options passed to the compiler.
+
+The following executables will be produced:
+
+lzBGL
+lzBGS
+lzBGT
+lzOG
+lziBGL
+lziBGS
+lziBGT
+lziOG
+
+All usage is the same for all the programs:
+
+Usage  : ./lzBGL [options]
+Options: 
+  -f iFile : file to process
+  -x       : use iFile + '.sa' for suffix array cache
+  -g       : check if resulting factorization produces input string
+
+if -x is specified, the program will also look for a file with 
+extension '.sa' appended to the input filename, and use it as the 
+suffix array if it exists, or create/overwrite the file if it does 
+not exist or seems to be out of date.
+
+The LZ factorization is returned in:
+   std::vector<std::pair<int,int> > lz;
+which is a sequence of
+  (length of factor, previous occurrence) if LPF > 0, or (0, T[p]).
+
+Currently the programs output only simple statistics based on lz.
+-------------------------------------------------------------
