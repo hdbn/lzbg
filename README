@@ -120,4 +120,9 @@ which is a sequence of
   (length of factor, previous occurrence) if LPF > 0, or (0, T[p]).
 
 Currently the programs output only simple statistics based on lz.
+
+-------------------------------------------------------------
+Authors:
+ Hideo Bannai
+ Keisuke Goto
 -------------------------------------------------------------
