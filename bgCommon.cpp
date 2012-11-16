@@ -76,9 +76,8 @@ namespace LZBG {
     std::cout << "Usage  : " << argv[0] << " [options]" << std::endl
 	      << "Options: " << std::endl
 	      << "  -f iFile : file to process" << std::endl
-	      << "  -x       : use iFile + '.sa' for suffix array cache"
-	      << "  -g       : check if resulting factorization produces input string"
-	      << std::endl;
+	      << "  -x       : use iFile + '.sa' for suffix array cache" << std::endl
+	      << "  -g       : check if resulting factorization produces input string" << std::endl;
     return;
   }
 
